@@ -65,3 +65,39 @@ Applied to all splits via `dataset.map(add_preprocessed_text, batched=True)` bef
 |----------|-------------|
 | `@john I love this! https://t.co/abc` | `@user I love this! http` |
 | `RT @news breaking story http://bit.ly/x` | `RT @user breaking story http` |
+
+---
+
+## 3. Label Distribution
+
+The notebook plots the training set label distribution to understand class balance.
+
+```python
+train_labels = dataset["train"]["label"]
+df_dist = pd.DataFrame({
+    "label_id": train_labels,
+    "label": [label_names[i] for i in train_labels]
+})
+sns.countplot(data=df_dist, x="label", order=label_names)
+```
+
+**Training set distribution (approximate):**
+
+| Label    | Count |
+|----------|-------|
+| anger    | ~1,600 |
+| joy      | ~1,100 |
+| optimism | ~700  |
+| sadness  | ~900  |
+
+`optimism` is the minority class (~14% of training data). This class-imbalance
+explains why all models show lower per-class F1 on `optimism` relative to the other labels.
+
+**Test set support (from classification reports):**
+
+| Label    | Test samples |
+|----------|-------------|
+| anger    | 558 |
+| joy      | 358 |
+| optimism | 123 |
+| sadness  | 382 |
