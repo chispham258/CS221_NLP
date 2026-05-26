@@ -127,7 +127,7 @@ max_length = 128
 
 `Rob-bs-CE-SCL` additional params: `scl_weight=0.1`, `scl_temperature=0.3`.
 
-**Design intent:** Rob-bs establishes a random-chance ceiling. Rob-tw shows the effect
+**Design intent:** Rob-bs establishes the untrained lower-bound baseline. Rob-tw shows the effect
 of Twitter-domain pretraining. Rob-bs-CE vs Rob-bs-CE-SCL isolates the effect of
 adding supervised contrastive loss on top of CE.
 
@@ -203,9 +203,10 @@ def get_tokenizer(model_name):
         return AutoTokenizer.from_pretrained(model_name, use_fast=True)
 ```
 
-All models in this experiment use `roberta-base` or `cardiffnlp/twitter-roberta-base`,
-so `use_fast=True` applies throughout. All inputs truncated to `max_length=128` tokens.
-Dynamic padding via `DataCollatorWithPadding`.
+`get_tokenizer` is the shared utility across all experiments (including others in the repo
+that use BERTweet). For the 4 models in this experiment, all use `roberta-base` or
+`cardiffnlp/twitter-roberta-base`, so `use_fast=True` applies throughout.
+All inputs truncated to `max_length=128` tokens. Dynamic padding via `DataCollatorWithPadding`.
 
 ### 6.2 HuggingFace Trainer
 
@@ -273,7 +274,7 @@ The `extract_logits` helper handles the case where `CESCLTrainer` returns
 | Rob-bs | None (untrained) | 14.10 | 39.27 | — |
 
 **Key observations:**
-- Rob-bs (untrained) scores 14.10% macro F1, just above random chance (25%).
+- Rob-bs (untrained) scores 14.10% macro F1, well below random chance (25% for 4 classes).
   This confirms fine-tuning is essential — the pretrained representations alone
   cannot classify emotion without a task-specific head trained on labels.
 - Rob-tw (+2.34pp over Rob-bs-CE) shows the clear benefit of Twitter-domain
@@ -309,7 +310,7 @@ reflects a different evaluation split or fine-tuning protocol in the paper.
 ## 9. Key Takeaways
 
 1. **Fine-tuning is required.** Rob-bs (untrained) achieves only 14.10% macro F1,
-   barely above random chance (25%), confirming that pretrained representations need
+   well below random chance (25% for 4 classes), confirming that pretrained representations need
    task-specific training to classify emotion effectively.
 
 2. **Twitter-domain pretraining adds ~2.3pp.** Rob-tw (81.16%) outperforms Rob-bs-CE
