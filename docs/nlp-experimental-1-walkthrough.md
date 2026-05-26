@@ -34,3 +34,34 @@ Split sizes (approximate):
 | train | 3,257 |
 | validation | 374 |
 | test | 1,421 |
+
+---
+
+## 2. Tweet Preprocessing
+
+Tweets are normalized before tokenization to reduce noise from usernames and URLs,
+following the CardiffNLP convention used when pretraining Twitter-specific models.
+
+```python
+def preprocess_tweet(text):
+    new_text = []
+    for t in text.split():
+        if len(t) > 1:
+            t = "@user" if t.startswith("@") and t.count("@") == 1 else t
+            t = "http" if t.startswith("http") else t
+        new_text.append(t)
+    return " ".join(new_text)
+```
+
+**Rules:**
+- `@mention` (single `@`) → `@user` — anonymizes usernames, reduces vocabulary size
+- `http://...` or `https://...` → `http` — collapses all URLs to a single token
+
+Applied to all splits via `dataset.map(add_preprocessed_text, batched=True)` before tokenization.
+
+**Example:**
+
+| Original | Preprocessed |
+|----------|-------------|
+| `@john I love this! https://t.co/abc` | `@user I love this! http` |
+| `RT @news breaking story http://bit.ly/x` | `RT @user breaking story http` |
