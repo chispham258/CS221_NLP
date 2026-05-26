@@ -187,3 +187,49 @@ class CESCLTrainer(Trainer):
 
 The low `α` keeps CE as the dominant signal while SCL regularizes the representation
 space to be more class-discriminative.
+
+---
+
+## 6. Training Pipeline
+
+### 6.1 Tokenization
+
+```python
+def get_tokenizer(model_name):
+    if model_name == "vinai/bertweet-base":
+        # BERTweet requires its own slow tokenizer with built-in normalization
+        return AutoTokenizer.from_pretrained(model_name, use_fast=False, normalization=True)
+    else:
+        return AutoTokenizer.from_pretrained(model_name, use_fast=True)
+```
+
+All models in this experiment use `roberta-base` or `cardiffnlp/twitter-roberta-base`,
+so `use_fast=True` applies throughout. All inputs truncated to `max_length=128` tokens.
+Dynamic padding via `DataCollatorWithPadding`.
+
+### 6.2 HuggingFace Trainer
+
+Standard `TrainingArguments` for CE-only models:
+
+```python
+TrainingArguments(
+    output_dir=f"./outputs/emotion/{short_name}",
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    metric_for_best_model="macro_f1",
+    num_train_epochs=5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=32,
+    learning_rate=1e-5,
+    seed=42,
+)
+```
+
+`Rob-bs-CE-SCL` uses `CESCLTrainer` (same args) instead of the default `Trainer`.
+`Rob-bs` uses no Trainer — it is evaluated zero-shot without fine-tuning.
+
+### 6.3 Reproducibility
+
+Seed fixed to `42` via `set_seed(42)` (transformers), `random.seed`, `np.random.seed`,
+and `torch.manual_seed` before each model training run.
