@@ -13,7 +13,7 @@ SAVED_MODELS_DIR = os.path.join(BASE_DIR, "saved_models")
 
 MODEL_MAP = {
     "Rob-bs": "emotion_Rob-bs",
-    "Rob-rt": "emotion_Rob-rt",
+    "Rob-tw": "emotion_Rob-tw",
     "Rob-bs-CE": "emotion_Rob-bs-CE",
     "Rob-bs-CE-SCL": "emotion_Rob-bs-CE-SCL",
 }
