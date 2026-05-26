@@ -303,3 +303,26 @@ Reference scores from the CardiffNLP TweetEval paper (commented in notebook):
 
 Our results exceed paper baselines in all cases. The large Rob-tw gap (+9.16pp) likely
 reflects a different evaluation split or fine-tuning protocol in the paper.
+
+---
+
+## 9. Key Takeaways
+
+1. **Fine-tuning is required.** Rob-bs (untrained) achieves only 14.10% macro F1,
+   barely above random chance (25%), confirming that pretrained representations need
+   task-specific training to classify emotion effectively.
+
+2. **Twitter-domain pretraining adds ~2.3pp.** Rob-tw (81.16%) outperforms Rob-bs-CE
+   (78.82%) with the same CE objective and hyperparameters, purely from domain-aligned
+   pretraining on tweets.
+
+3. **SCL adds a consistent +0.69pp over CE-only** on roberta-base. The CLS token
+   representations become more class-discriminative even without contrastive augmentation
+   (n_views=1). Cost: ~6s extra training time per epoch.
+
+4. **`optimism` is the hard class.** All models show the lowest per-class F1 for
+   `optimism` (minority class, 123 test samples). Future work: class-weighted CE or oversampling.
+
+5. **Tweet normalization is load-bearing.** Replacing @mentions and URLs before tokenization
+   prevents vocabulary fragmentation on user-specific tokens — especially critical for
+   non-Twitter-pretrained models like roberta-base.
