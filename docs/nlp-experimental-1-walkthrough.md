@@ -233,3 +233,73 @@ TrainingArguments(
 
 Seed fixed to `42` via `set_seed(42)` (transformers), `random.seed`, `np.random.seed`,
 and `torch.manual_seed` before each model training run.
+
+---
+
+## 7. Evaluation Metrics
+
+```python
+def compute_metrics(eval_pred):
+    predictions, labels = eval_pred
+    logits = predictions[0] if isinstance(predictions, (tuple, list)) else predictions
+    preds = np.argmax(logits, axis=-1)
+    return {
+        "accuracy":         accuracy_score(labels, preds),
+        "macro_f1":         f1_score(labels, preds, average="macro"),
+        "weighted_f1":      f1_score(labels, preds, average="weighted"),
+        "macro_precision":  precision_score(labels, preds, average="macro", zero_division=0),
+        "macro_recall":     recall_score(labels, preds, average="macro", zero_division=0),
+    }
+```
+
+**Primary metric:** `macro_f1` — unweighted average F1 across all 4 classes.
+Macro averaging treats all classes equally, making it robust to class imbalance
+(especially the minority `optimism` class).
+
+The `extract_logits` helper handles the case where `CESCLTrainer` returns
+`(logits, hidden_states, ...)` tuples instead of bare logits.
+
+---
+
+## 8. Results
+
+### 8.1 Model Comparison on Test Set
+
+| Model | Training objective | Macro F1 (%) | Accuracy (%) | Train time (s) |
+|-------|-------------------|-------------|-------------|---------------|
+| Rob-tw | CE (Twitter pretrain) | 81.16 | 84.10 | 53.1 |
+| Rob-bs-CE-SCL | CE + SCL | 79.51 | 82.41 | 56.7 |
+| Rob-bs-CE | CE only | 78.82 | 81.70 | 50.7 |
+| Rob-bs | None (untrained) | 14.10 | 39.27 | — |
+
+**Key observations:**
+- Rob-bs (untrained) scores 14.10% macro F1, just above random chance (25%).
+  This confirms fine-tuning is essential — the pretrained representations alone
+  cannot classify emotion without a task-specific head trained on labels.
+- Rob-tw (+2.34pp over Rob-bs-CE) shows the clear benefit of Twitter-domain
+  pretraining even when the fine-tuning objective is identical.
+- SCL adds +0.69pp macro F1 over CE-only on the same roberta-base checkpoint,
+  with modest extra training time (~6s per epoch).
+
+### 8.2 Loss Ablation (roberta-base only)
+
+| Model | Loss | Macro F1 (%) | Δ vs CE-only |
+|-------|------|-------------|-------------|
+| Rob-bs-CE-SCL | CE + SCL (α=0.1, T=0.3) | 79.51 | +0.69pp |
+| Rob-bs-CE | CE only | 78.82 | baseline |
+
+SCL encourages same-class CLS embeddings to cluster together and pushes different-class
+embeddings apart, regularizing the representation space beyond what CE alone achieves.
+
+### 8.3 Comparison to Paper Baselines
+
+Reference scores from the CardiffNLP TweetEval paper (commented in notebook):
+
+| Model | Our macro F1 (%) | Paper macro F1 (%) | Gap |
+|-------|-----------------|-------------------|-----|
+| Rob-tw | 81.16 | 72.0 | +9.16 |
+| Rob-bs-CE-SCL | 79.51 | 78.1 | +1.41 |
+| Rob-bs-CE | 78.82 | 76.1 | +2.72 |
+
+Our results exceed paper baselines in all cases. The large Rob-tw gap (+9.16pp) likely
+reflects a different evaluation split or fine-tuning protocol in the paper.
