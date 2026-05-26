@@ -101,3 +101,32 @@ explains why all models show lower per-class F1 on `optimism` relative to the ot
 | joy      | 358 |
 | optimism | 123 |
 | sadness  | 382 |
+
+---
+
+## 4. Model Configurations
+
+Four models are evaluated, covering an untrained baseline, a Twitter-pretrained model,
+and two loss-function ablations on `roberta-base`.
+
+| Short name | HuggingFace checkpoint | Training mode | Notes |
+|------------|------------------------|--------------|-------|
+| Rob-bs | `roberta-base` | none (untrained) | Zero-shot baseline — no fine-tuning |
+| Rob-tw | `cardiffnlp/twitter-roberta-base` | CE | RoBERTa pretrained on tweets, standard fine-tuning |
+| Rob-bs-CE | `roberta-base` | CE | roberta-base fine-tuned with cross-entropy only |
+| Rob-bs-CE-SCL | `roberta-base` | CE + SCL | roberta-base fine-tuned with CE + contrastive loss |
+
+Shared fine-tuning hyperparameters (all except Rob-bs):
+
+```python
+lr = 1e-5
+batch_size = 16
+epochs = 5
+max_length = 128
+```
+
+`Rob-bs-CE-SCL` additional params: `scl_weight=0.1`, `scl_temperature=0.3`.
+
+**Design intent:** Rob-bs establishes a random-chance ceiling. Rob-tw shows the effect
+of Twitter-domain pretraining. Rob-bs-CE vs Rob-bs-CE-SCL isolates the effect of
+adding supervised contrastive loss on top of CE.
