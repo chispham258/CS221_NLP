@@ -1,0 +1,2 @@
+model,hf_model,task,accuracy,macro_f1,weighted_f1,macro_precision,macro_recall,eval_loss,train_time_sec,epochs,lr,batch_size,max_length
+XLM-tw,cardiffnlp/twitter-xlm-roberta-base,emotion,0.8156228008444757,0.7888004780020944,0.8156714985094775,0.7958360528677211,0.783958112010047,0.6429711580276489,53.256147623062134,5,1e-05,16,128

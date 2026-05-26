@@ -1,0 +1,2 @@
+model , hf_model    , task   , accuracy           , macro_f1           , weighted_f1        , macro_precision    , macro_recall, eval_loss         , training_mode
+Rob-bs, roberta-base, emotion, 0.39268121041520054, 0.14098029307731177, 0.22144124852115404, 0.09817030260380014,         0.25, 1.3861957788467407, none

@@ -1,0 +1,2 @@
+model,hf_model,task,accuracy,macro_f1,weighted_f1,macro_precision,macro_recall,eval_loss,train_time_sec,epochs,lr,batch_size,max_length
+XLM-r,xlm-roberta-base,emotion,0.7973258268824771,0.7629737299228242,0.7971692711289527,0.7656637364933228,0.7606324738507491,0.6292864680290222,51.834229946136475,5,1e-05,16,128

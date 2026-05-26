@@ -1,0 +1,2 @@
+model , hf_model    , task   , accuracy         , macro_f1          , weighted_f1       , macro_precision , macro_recall      , eval_loss         , train_time_sec   , epochs, lr   , batch_size, max_length
+Rob-rt, roberta-base, emotion, 0.817030260380014, 0.7881764777653094, 0.8168425502532797, 0.79232247972702, 0.7847484425057911, 0.6097411513328552, 50.72420263290405,      5, 1e-05,         16,        128

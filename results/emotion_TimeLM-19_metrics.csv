@@ -1,0 +1,2 @@
+model,hf_model,task,accuracy,macro_f1,weighted_f1,macro_precision,macro_recall,eval_loss,train_time_sec,epochs,lr,batch_size,max_length
+TimeLM-19,cardiffnlp/twitter-roberta-base-2019-90m,emotion,0.840253342716397,0.8139855821093149,0.8397633635504953,0.8209724657122344,0.8081031470154831,0.547968327999115,50.45411443710327,5,1e-05,16,128

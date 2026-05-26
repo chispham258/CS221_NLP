@@ -1,0 +1,2 @@
+model , hf_model                       , task   , accuracy          , macro_f1          , weighted_f1      , macro_precision   , macro_recall      , eval_loss         , train_time_sec  , epochs, lr   , batch_size, max_length
+Rob-tw, cardiffnlp/twitter-roberta-base, emotion, 0.8409570724841661, 0.8115683198051519, 0.840785426656608, 0.8128417320824528, 0.8103550361435177, 0.5384364128112793, 53.0882785320282,      5, 1e-05,         16,        128

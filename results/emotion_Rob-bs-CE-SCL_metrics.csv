@@ -1,0 +1,2 @@
+model,hf_model,task,accuracy,macro_f1,weighted_f1,macro_precision,macro_recall,eval_loss,train_time_sec,epochs,lr,batch_size,max_length,training_mode,scl_weight,scl_temperature
+Rob-bs-CE-SCL,roberta-base,emotion,0.8240675580577058,0.7950894920697973,0.8238833902840663,0.7987597192345326,0.7919330763563679,0.908435046672821,56.74588441848755,5,1e-05,16,128,ce_scl,0.1,0.3
