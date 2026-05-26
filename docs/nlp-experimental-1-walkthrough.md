@@ -130,3 +130,60 @@ max_length = 128
 **Design intent:** Rob-bs establishes a random-chance ceiling. Rob-tw shows the effect
 of Twitter-domain pretraining. Rob-bs-CE vs Rob-bs-CE-SCL isolates the effect of
 adding supervised contrastive loss on top of CE.
+
+---
+
+## 5. Loss Functions
+
+### 5.1 Standard Cross-Entropy (CE)
+
+Default for all standard fine-tuning experiments. The HuggingFace `Trainer` computes CE
+loss automatically from `AutoModelForSequenceClassification`.
+
+### 5.2 Supervised Contrastive Loss (SCL)
+
+Implemented as `SupConLoss`, a re-implementation of the SupCon paper
+(Khosla et al., 2020), operating on CLS-token representations.
+
+```python
+class SupConLoss(nn.Module):
+    def __init__(self, temperature=0.3, base_temperature=0.3):
+        super().__init__()
+        self.temperature = temperature
+        self.base_temperature = base_temperature
+
+    def forward(self, features, labels):
+        # features: [batch_size, n_views, hidden_dim]
+        # Pulls same-class representations together,
+        # pushes different-class representations apart.
+        ...
+```
+
+**Key properties:**
+- `temperature=0.3` — controls sharpness of the similarity distribution
+- `n_views=1` — no augmentation; single CLS embedding per sample
+- Uses cosine similarity (L2-normalized features) scaled by temperature
+
+### 5.3 Combined CE + SCL (`CESCLTrainer`)
+
+A custom `Trainer` subclass that computes both losses and combines them:
+
+```python
+class CESCLTrainer(Trainer):
+    def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+        outputs = model(**inputs, output_hidden_states=True, return_dict=True)
+        ce_loss = outputs.loss
+
+        # CLS token from last hidden layer
+        features = outputs.hidden_states[-1][:, 0, :]
+        features = F.normalize(features, p=2, dim=1).unsqueeze(1)
+
+        scl_loss = self.scl_loss_fn(features, inputs["labels"])
+        loss = ce_loss + self.scl_weight * scl_loss
+        return (loss, outputs) if return_outputs else loss
+```
+
+**Combined loss:** `L = L_CE + α · L_SCL` where `α = scl_weight = 0.1`
+
+The low `α` keeps CE as the dominant signal while SCL regularizes the representation
+space to be more class-discriminative.
